@@ -20,24 +20,17 @@ jobs:
           server: ${{ secrets.FTP_SERVER }}
           username: ${{ secrets.FTP_USERNAME }}
           password: ${{ secrets.FTP_PASSWORD }}
-          protocol: ftp
+          protocol: ftps
           port: 21
+          security: permissive
           server-dir: /Rev01/
-          dangerous-clean-slate: false
+          dry-run: true
           exclude: |
             **/.git*
             **/.github/**
             **/.vscode/**
-            **/.idea/**
             **/.env*
-            **/wp-config.php
-            **/configuration.php
-            **/config.php
-            **/database.php
             **/node_modules/**
             **/vendor/**
             **/cache/**
             **/tmp/**
-            **/temp/**
-            **/logs/**
-            **/*.log
