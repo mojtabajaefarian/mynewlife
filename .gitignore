@@ -1,0 +1,38 @@
+# Secrets and configs
+.env
+.env.*
+wp-config.php
+configuration.php
+config.php
+database.php
+secrets.json
+credentials.json
+*.pem
+*.key
+
+# Logs
+*.log
+error_log
+debug.log
+logs/
+
+# Cache and temp
+cache/
+tmp/
+temp/
+
+# Dependencies
+node_modules/
+vendor/
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Uploads if not needed in Git
+# uploads/
+# media/
