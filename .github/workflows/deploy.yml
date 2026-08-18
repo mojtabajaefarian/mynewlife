@@ -22,7 +22,7 @@ jobs:
           password: ${{ secrets.FTP_PASSWORD }}
           protocol: ftp
           port: 21
-          server-dir: Rev01/
+          server-dir: /Rev01/
           dangerous-clean-slate: false
           exclude: |
             **/.git*
