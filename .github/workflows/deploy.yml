@@ -13,24 +13,39 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-
+        with:
+          # خیلی مهم: .git را در workspace نگه نمی‌داریم
+          fetch-depth: 1
+      
       - name: FTP Deploy
         uses: SamKirkland/FTP-Deploy-Action@v4.3.5
         with:
           server: ${{ secrets.FTP_SERVER }}
           username: ${{ secrets.FTP_USERNAME }}
           password: ${{ secrets.FTP_PASSWORD }}
-          protocol: ftps  # ← تغییر از ftp به ftps (امن‌تر و پایدارتر)
+          protocol: ftps
           port: 21
           server-dir: /Rev01/
-          dangerous-clean-slate: false
-          timeout: 600000  # ← ۱۰ دقیقه timeout (به جای پیش‌فرض ۲ دقیقه)
+          
+          # تنظیمات پایداری
+          timeout: 600000
           log-level: standard
+          security: loose  # برای FTPS روی هاست اشتراکی
+          
+          # فایل state برای ردیابی تغییرات
+          state-name: .ftp-deploy-sync-state.json
+          
+          # مهم‌ترین بخش: exclude کامل
           exclude: |
+            **/.git/**
             **/.git*
+            .git/**
+            .git*
             **/.github/**
             **/.vscode/**
             **/.ai-memory/**
+            **/.DS_Store
+            **/Thumbs.db
             **/.env*
             **/node_modules/**
             **/vendor/**
@@ -40,26 +55,39 @@ jobs:
             **/logs/**
             **/*.log
             
-            # فایل‌های حساس
+            # فایل‌های حساس و پیکربندی
             **/config.php
+            **/config.example.php
             **/secrets.json
             **/credentials.json
             **/.htpasswd*
+            **/.ftp-deploy-sync-state.json
             
-            # داده‌های runtime (هرگز نباید overwrite بشن)
+            # داده‌های runtime (هرگز overwrite نشوند)
             **/data/db.json
             **/data/auth_user.json
             **/data/auth_lock.json
             **/data/backups/**
+            **/data/*.json
             **/settings.json
+            **/data/.htaccess*
             
             # فایل‌های تست و توسعه
             **/_scan.php
             **/_selftest.php
             **/test.php
             **/debug.php
+            **/PROJECT_BRAIN_Stracture.md
+            **/AGENTS.md
+            **/AI_CONTEXT.md
+            **/README.md
 
-      - name: Retry on failure
+      - name: Wait before retry
+        if: failure()
+        run: Start-Sleep -Seconds 10
+        shell: powershell
+
+      - name: Retry FTP Deploy (attempt 2)
         if: failure()
         uses: SamKirkland/FTP-Deploy-Action@v4.3.5
         with:
@@ -69,16 +97,21 @@ jobs:
           protocol: ftps
           port: 21
           server-dir: /Rev01/
-          dangerous-clean-slate: false
           timeout: 600000
+          security: loose
+          state-name: .ftp-deploy-sync-state.json
           exclude: |
+            **/.git/**
             **/.git*
+            .git/**
+            .git*
             **/.github/**
             **/.vscode/**
             **/.ai-memory/**
             **/config.php
-            **/data/db.json
-            **/data/auth_user.json
-            **/data/auth_lock.json
-            **/data/backups/**
+            **/data/**
             **/settings.json
+            **/_scan.php
+            **/_selftest.php
+            **/AGENTS.md
+            **/AI_CONTEXT.md
