@@ -3,7 +3,6 @@
 .env.*
 wp-config.php
 configuration.php
-config.php
 database.php
 secrets.json
 credentials.json
