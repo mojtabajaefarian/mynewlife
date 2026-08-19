@@ -9,7 +9,7 @@ on:
 jobs:
   ftp-deploy:
     runs-on: [self-hosted, windows, x64]
-
+    
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -20,18 +20,65 @@ jobs:
           server: ${{ secrets.FTP_SERVER }}
           username: ${{ secrets.FTP_USERNAME }}
           password: ${{ secrets.FTP_PASSWORD }}
-          protocol: ftp
+          protocol: ftps  # ← تغییر از ftp به ftps (امن‌تر و پایدارتر)
           port: 21
           server-dir: /Rev01/
           dangerous-clean-slate: false
+          timeout: 600000  # ← ۱۰ دقیقه timeout (به جای پیش‌فرض ۲ دقیقه)
+          log-level: standard
           exclude: |
             **/.git*
             **/.github/**
             **/.vscode/**
+            **/.ai-memory/**
             **/.env*
             **/node_modules/**
             **/vendor/**
             **/cache/**
             **/tmp/**
+            **/temp/**
             **/logs/**
             **/*.log
+            
+            # فایل‌های حساس
+            **/config.php
+            **/secrets.json
+            **/credentials.json
+            **/.htpasswd*
+            
+            # داده‌های runtime (هرگز نباید overwrite بشن)
+            **/data/db.json
+            **/data/auth_user.json
+            **/data/auth_lock.json
+            **/data/backups/**
+            **/settings.json
+            
+            # فایل‌های تست و توسعه
+            **/_scan.php
+            **/_selftest.php
+            **/test.php
+            **/debug.php
+
+      - name: Retry on failure
+        if: failure()
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+        with:
+          server: ${{ secrets.FTP_SERVER }}
+          username: ${{ secrets.FTP_USERNAME }}
+          password: ${{ secrets.FTP_PASSWORD }}
+          protocol: ftps
+          port: 21
+          server-dir: /Rev01/
+          dangerous-clean-slate: false
+          timeout: 600000
+          exclude: |
+            **/.git*
+            **/.github/**
+            **/.vscode/**
+            **/.ai-memory/**
+            **/config.php
+            **/data/db.json
+            **/data/auth_user.json
+            **/data/auth_lock.json
+            **/data/backups/**
+            **/settings.json
